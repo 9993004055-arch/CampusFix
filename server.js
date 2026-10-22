@@ -2,7 +2,21 @@ require('dotenv').config();
 const express=require('express'),session=require('express-session'),MySQLStoreFactory=require('express-mysql-session');
 const mysql=require('mysql2/promise'),bcrypt=require('bcryptjs'),multer=require('multer'),path=require('path'),fs=require('fs'),crypto=require('crypto'),helmet=require('helmet');
 const app=express(),PORT=Number(process.env.PORT||3000);
-const db={host:process.env.DB_HOST||'localhost',port:Number(process.env.DB_PORT||3306),user:process.env.DB_USER||'root',password:process.env.DB_PASSWORD||'',database:process.env.DB_NAME||'campus_fault_db',waitForConnections:true,connectionLimit:10,queueLimit:0};
+
+const db = {
+  host: process.env.DB_HOST || 'localhost',
+  port: Number(process.env.DB_PORT || 3306),
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'campus_fault_db',
+  ssl: {
+    ca: fs.readFileSync(path.join(__dirname, 'aiven-ca.pem'))
+  },
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+};
+
 const pool=mysql.createPool(db),MySQLStore=MySQLStoreFactory(session);
 const store=new MySQLStore({...db,createDatabaseTable:true,schema:{tableName:'sessions'}});
 app.use(helmet({contentSecurityPolicy:false}));app.use(express.json({limit:'1mb'}));app.use(express.urlencoded({extended:true}));
