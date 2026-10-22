@@ -8,7 +8,38 @@ const priority=p=>`<span class="priority ${esc(p)}">${esc(p[0].toUpperCase()+p.s
 document.addEventListener('click',async e=>{if(e.target.closest('[data-logout]')){e.preventDefault();try{await api('/api/logout',{method:'POST'});location.href='/'}catch(x){alert(x.message)}}});
 document.addEventListener('DOMContentLoaded',async()=>{
  let user=null;try{user=(await api('/api/me')).user}catch{}
- const lf=$('#loginForm');if(lf)lf.onsubmit=async e=>{e.preventDefault();try{let d=await api('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(lf)))});msg(d.message,'success');setTimeout(()=>location.href='/dashboard.html',500)}catch(x){msg(x.message)}};
+ 
+const lf = $('#loginForm');
+
+if (lf) {
+    lf.onsubmit = async e => {
+        e.preventDefault();
+
+        try {
+            const d = await api('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(
+                    Object.fromEntries(new FormData(lf))
+                )
+            });
+
+            if (!d.user || !d.user.role) {
+                throw new Error('Login succeeded, but the user role was not returned.');
+            }
+
+            msg(d.message, 'success');
+
+            setTimeout(() => {
+                location.href = '/dashboard.html';
+            }, 500);
+
+        } catch (x) {
+            msg(x.message);
+        }
+    };
+}
+
  const rf=$('#registerForm');if(rf)rf.onsubmit=async e=>{e.preventDefault();try{let d=await api('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(rf)))});msg(d.message,'success');setTimeout(()=>location.href='/login.html',800)}catch(x){msg(x.message)}};
  const form=$('#reportForm');if(form){if(!user){msg('Please sign in first.');setTimeout(()=>location.href='/login.html',800)}form.onsubmit=async e=>{e.preventDefault();try{let d=await api('/api/reports',{method:'POST',body:new FormData(form)});msg(d.message,'success');setTimeout(()=>location.href='/report-view.html?id='+d.id,700)}catch(x){msg(x.message)}}}
  if($('#stats'))loadDash(user);if(user&&user.role==='admin')initStaffManager();if($('#detailArea'))loadDetails(user);if($('#notificationsArea'))loadNotifications(user);
