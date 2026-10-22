@@ -2,6 +2,7 @@ require('dotenv').config();
 const express=require('express'),session=require('express-session'),MySQLStoreFactory=require('express-mysql-session');
 const mysql=require('mysql2/promise'),bcrypt=require('bcryptjs'),multer=require('multer'),path=require('path'),fs=require('fs'),crypto=require('crypto'),helmet=require('helmet');
 const app=express(),PORT=Number(process.env.PORT||3000);
+app.set('trust proxy', 1);
 
 const db = {
   host: process.env.DB_HOST || 'localhost',
